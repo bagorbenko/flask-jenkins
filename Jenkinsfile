@@ -17,6 +17,7 @@ pipeline {
         stage('Clone repository') {
             steps {
                 cleanWs()
+                sh 'rm -rf /opt/flask-jenkins/*'
                 git branch: "${BRANCH_NAME}", url: "${REPO_URL}"
             }
         }
