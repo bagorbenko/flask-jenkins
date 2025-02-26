@@ -61,19 +61,30 @@ pipeline {
     }
 
     post {
-        success {
+    always {
+        script {
+            def lastCommit = sh(script: "git log -1 --pretty=format:'%h'", returnStdout: true).trim()
+            def author = sh(script: "git log -1 --pretty=format:'%an'", returnStdout: true).trim()
+            def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
+            def buildStatus = currentBuild.result ?: 'SUCCESS'
+            def statusEmoji = buildStatus == 'SUCCESS' ? "✅" : "❌"
+
+            def message = """$statusEmoji Обновление билда: $buildStatus
+Last commit: $lastCommit
+Author: $author
+Branch: $branch"""
+
             sh """
                 curl -i -X POST -H "Content-Type: application/json" \\
-                -d '{"chat_id":"269199712","text":"Обновление билда: УДАЧНО","disable_notification":false}' \\
+                -d '{
+                    "chat_id": "269199712",
+                    "text": "$message",
+                    "disable_notification": false
+                }' \\
                 https://api.telegram.org/bot7511855444:AAEDvkMdddaKa4B2AArcudj7IEzQUQF6Lm8/sendMessage
             """
-        }
-        failure {
-            sh """
-                curl -i -X POST -H "Content-Type: application/json" \\
-                -d '{"chat_id":"269199712","text":"Обновление билда: ОШИБКА","disable_notification":false}' \\
-                https://api.telegram.org/bot7511855444:AAEDvkMdddaKa4B2AArcudj7IEzQUQF6Lm8/sendMessage
-            """
+            
+            }
         }
     }
 }
