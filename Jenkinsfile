@@ -50,9 +50,12 @@ pipeline {
                     rm ${DEPLOY_DIR}/app.pid
                 fi
 
+                echo "Updating application files..."
+                rsync -av --exclude 'venv' --exclude '*.log' . ${DEPLOY_DIR}/
+
                 echo "Starting Flask application..."
                 source ${VENV_DIR}/bin/activate
-                nohup python app.py --host=0.0.0.0 --port=${FLASK_PORT} > ${DEPLOY_DIR}/app.log 2>&1 &
+                nohup python ${DEPLOY_DIR}/app.py --host=0.0.0.0 --port=${FLASK_PORT} > ${DEPLOY_DIR}/app.log 2>&1 &
                 echo $! > ${DEPLOY_DIR}/app.pid
                 echo "Application started on port ${FLASK_PORT}!"
                 '''
@@ -83,7 +86,6 @@ Branch: $branch"""
                 }' \\
                 https://api.telegram.org/bot7511855444:AAEDvkMdddaKa4B2AArcudj7IEzQUQF6Lm8/sendMessage
             """
-            
             }
         }
     }
