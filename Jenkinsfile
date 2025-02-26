@@ -22,7 +22,7 @@ pipeline {
                 sh '''
                 echo "Setting up virtual environment..."
                 python3 -m venv ${VENV_DIR}
-                source ${VENV_DIR}/bin/activate
+                . ${VENV_DIR}/bin/activate
                 pip install --upgrade pip
                 pip install -r requirements.txt
                 echo "Python environment setup completed!"
@@ -32,9 +32,10 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh '''
+                sh '''#!/bin/bash
                 echo "Running tests..."
                 source ${VENV_DIR}/bin/activate
+                which pytest
                 pytest tests.py --maxfail=1 --disable-warnings || echo "Tests failed!"
                 '''
             }
@@ -42,7 +43,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh '''
+                sh '''#!/bin/bash
                 echo "Stopping old Flask process..."
                 if [ -f ${DEPLOY_DIR}/app.pid ]; then
                     kill $(cat ${DEPLOY_DIR}/app.pid) || true
