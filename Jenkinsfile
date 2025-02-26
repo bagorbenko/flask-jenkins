@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'master' }
+    agent any
 
     environment {
         REPO_URL = 'https://github.com/bagorbenko/flask-jenkins.git'
@@ -35,7 +35,7 @@ pipeline {
                 sh '''
                 echo "Running tests..."
                 source ${VENV_DIR}/bin/activate
-                pytest tests/ --maxfail=1 --disable-warnings || echo "Tests failed!"
+                pytest tests.py --maxfail=1 --disable-warnings || echo "Tests failed!"
                 '''
             }
         }
@@ -60,12 +60,19 @@ pipeline {
     }
 
     post {
-        failure {
-            echo '❌ Pipeline failed! Check logs for details.'
-        }
         success {
-            echo '✅ Deployment successful!'
+            sh """
+                curl -i -X POST -H "Content-Type: application/json" \\
+                -d '{"chat_id":"269199712","text":"Обновление билда: УДАЧНО","disable_notification":false}' \\
+                https://api.telegram.org/bot7511855444:AAEDvkMdddaKa4B2AArcudj7IEzQUQF6Lm8/sendMessage
+            """
+        }
+        failure {
+            sh """
+                curl -i -X POST -H "Content-Type: application/json" \\
+                -d '{"chat_id":"269199712","text":"Обновление билда: ОШИБКА","disable_notification":false}' \\
+                https://api.telegram.org/bot7511855444:AAEDvkMdddaKa4B2AArcudj7IEzQUQF6Lm8/sendMessage
+            """
         }
     }
 }
-
