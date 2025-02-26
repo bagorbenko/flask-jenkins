@@ -38,7 +38,7 @@ pipeline {
             steps {
                 sh '''
                 echo "Running tests..."
-                source ${VENV_DIR}/bin/activate
+                . ${VENV_DIR}/bin/activate
                 pytest tests.py --maxfail=1 --disable-warnings
                 '''
             }
@@ -54,7 +54,7 @@ pipeline {
                 fi
 
                 echo "Starting Flask application..."
-                source ${VENV_DIR}/bin/activate
+                . ${VENV_DIR}/bin/activate
                 nohup python app.py --host=0.0.0.0 --port=${FLASK_PORT} > ${DEPLOY_DIR}/app.log 2>&1 &
                 echo $! > ${DEPLOY_DIR}/app.pid
                 echo "Application started on port ${FLASK_PORT}!"
