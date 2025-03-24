@@ -1,2 +1,5 @@
-flask
+black
+flake8
 pytest
+gunicorn
+flask
